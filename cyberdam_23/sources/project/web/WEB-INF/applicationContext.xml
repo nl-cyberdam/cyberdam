@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+        http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/jdbc.properties" />
+	</bean>
+
+	<!-- caching service to be used by acegi, hibernate second level cache, 
+		and specialized caches like the multilanguage cache
+	-->
+
+	<!-- The created cache manager is an instance of net.sf.ehcache.CacheManager -->
+	<bean id="cacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation">
+			<value>classpath:ehcache.xml</value>
+		</property>
+		<property name="shared" value="true" />
+	</bean>
+
+	<bean id="cacheProvider"
+		class="org.springmodules.cache.provider.ehcache.EhCacheFacade">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<!-- Hibernate SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- some mappings cannot be set as a property -->
+		<!--
+			<property name="mappingResources">
+			<value>cyberdam.hbm.xml</value>
+			</property>
+		-->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					${hibernate.dialect}
+				</prop>
+				<!--                <prop key="hibernate.show_sql">true</prop>-->
+				<!-- Show and print nice SQL on stdout -->
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.generate_statistics">true</prop>
+				<prop key="hibernate.cache.use_structured_entries">
+					true
+				</prop><!-- for easy inspection of the cache -->
+				<prop key="hibernate.cache.use_query_cache">true</prop><!-- enable query cache -->
+				<!-- only for development/testing: generate database tables from hibernate definitions -->
+				<!--                <prop key="hibernate.hbm2ddl.auto">create</prop>-->
+				<prop key="hibernate.hbm2ddl.auto">
+					${hibernate.hbm2ddl.setting}
+				</prop>
+				<!--                <prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>-->
+				<prop key="hibernate.cache.provider_class">
+					net.sf.ehcache.hibernate.SingletonEhCacheProvider
+				</prop>
+				<prop
+					key="hibernate.cache.provider_configuration_file_resource_path">
+					/ehcache.xml
+				</prop>
+				<prop key="hibernate.connection.release_mode">
+					auto
+				</prop>
+
+				<prop key="hibernate.connection.useUnicode">true</prop>
+				<prop key="hibernate.connection.characterEncoding">
+					UTF-8
+				</prop>
+
+			</props>
+		</property>
+		<property name="annotatedClasses">
+			<list>
+				<value>nl.cyberdam.domain.User</value>
+				<value>nl.cyberdam.domain.PlaygroundObject</value>
+				<value>nl.cyberdam.domain.Group</value>
+				<value>nl.cyberdam.domain.Playground</value>
+				<value>nl.cyberdam.domain.Activity</value>
+				<value>nl.cyberdam.domain.FileUploadActivity</value>
+				<value>nl.cyberdam.domain.MessageActivity</value>
+				<value>nl.cyberdam.domain.ProgressActivity</value>
+				<value>nl.cyberdam.domain.FormActivity</value>
+				<value>nl.cyberdam.domain.EventActivity</value>
+				<value>nl.cyberdam.domain.Role</value>
+				<value>nl.cyberdam.domain.StepOfPlay</value>
+				<value>nl.cyberdam.domain.GameModel</value>
+				<value>nl.cyberdam.domain.Resource</value>
+				<value>nl.cyberdam.domain.Variable</value>
+				<value>nl.cyberdam.domain.ActivityVariable</value>
+				<value>nl.cyberdam.domain.VariableSessionValue</value>
+				<value>
+					nl.cyberdam.multilanguage.MultiLanguageMessage
+				</value>
+				<value>nl.cyberdam.multilanguage.LanguagePack</value>
+				<value>nl.cyberdam.domain.GameManifest</value>
+				<value>
+					nl.cyberdam.domain.RoleToPlaygroundMapping
+				</value>
+				<value>nl.cyberdam.domain.Participant</value>
+				<value>nl.cyberdam.domain.GameSession</value>
+				<value>nl.cyberdam.domain.Message</value>
+				<value>nl.cyberdam.domain.MessageBox</value>
+				<value>nl.cyberdam.domain.RoleActivity</value>
+				<value>nl.cyberdam.domain.LogEntry</value>
+				<value>nl.cyberdam.domain.NextStepOfPlay</value>
+				<value>nl.cyberdam.domain.SessionResource</value>
+				<value>nl.cyberdam.domain.SessionResourceBox</value>
+				<value>nl.cyberdam.domain.SessionReportLogItem</value>
+				<value>nl.cyberdam.domain.SystemParameters</value>
+				<value>nl.cyberdam.domain.SessionPlaygroundObject</value>
+			</list>
+		</property>
+		<property name="eventListeners">
+			<map>
+				<entry key="merge">
+					<bean
+						class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<!-- Transaction manager for a single Hibernate SessionFactory (alternative to JTA) -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- enable the configuration of transactional behavior based on annotations -->
+	<tx:annotation-driven proxy-target-class="true" />
+
+	<bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+
+	<bean id="hibernateSessionInterceptor"
+		class="org.springframework.orm.hibernate3.HibernateInterceptor">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+
+	<bean id="userManager"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyTargetClass">
+			<value>true</value>
+		</property>
+		<property name="target">
+			<bean id="userManagerTarget"
+				class="nl.cyberdam.service.UserManagerImpl">
+				<property name="sessionFactory" ref="sessionFactory" />
+				<property name="passwordEncoder">
+					<ref bean="passwordEncoder" />
+				</property>
+				<property name="gameLogService" ref="logService" />
+			</bean>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>hibernateSessionInterceptor</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="gameManager"
+		class="nl.cyberdam.service.GameManagerImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="gameLogService" ref="logService" />
+		<property name="mailService">
+			<ref bean="mailService" />
+		</property>
+		<property name="messageSource" ref="messageSource" />
+	</bean>
+
+	<bean id="logService" class="nl.cyberdam.service.LogServiceImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+
+	<bean id="scriptManager"
+		class="nl.cyberdam.service.ScriptManager">
+		<property name="gameManager" ref="gameManager" />
+		<property name="messageSource" ref="messageSource" />
+		<property name="scriptLibrary" value="/WEB-INF/cyberdam.js" />
+	</bean>
+
+	<!-- this message source just returns the code itself as a message, its the last one in the chain
+		and always returns a message -->
+	<bean id="echoKeyMessageSource"
+		class="nl.cyberdam.multilanguage.EchoKeyMessageSource" />
+
+	<!-- this message source uses property files, for developer supplied default messages -->
+	<bean id="resourceBundleMessageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="messages" />
+		<property name="parentMessageSource" ref="echoKeyMessageSource" />
+	</bean>
+
+	<!-- message source that uses the database but falls back on property files if no message is found -->
+	<ehcache:proxy id="dbMessageSource">
+		<bean
+			class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+			<property name="transactionManager"
+				ref="transactionManager" />
+			<property name="target">
+				<bean class="nl.cyberdam.multilanguage.MessageSource">
+					<property name="parentMessageSource"
+						ref="resourceBundleMessageSource" />
+					<property name="sessionFactory"
+						ref="sessionFactory" />
+					<property name="systemProperties">
+						<props>
+							<prop key="multilanguage.languages">
+								en,nl,xx
+							</prop>
+						</props>
+					</property>
+				</bean>
+			</property>
+			<property name="transactionAttributes">
+				<props>
+					<prop key="save">PROPAGATION_REQUIRED</prop>
+					<prop key="delete">PROPAGATION_REQUIRED</prop>
+					<prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+				</props>
+			</property>
+		</bean>
+
+		<ehcache:caching methodName="getMessage"
+			cacheName="multilanguageCache" />
+		<ehcache:flushing methodName="save"
+			cacheNames="multilanguageCache" />
+		<ehcache:flushing methodName="delete"
+			cacheNames="multilanguageCache" />
+	</ehcache:proxy>
+
+	<!-- alias so a messagesource with the default name is available (useful form spring:message tags) -->
+	<alias alias="messageSource" name="dbMessageSource" />
+
+	<bean id="exchangeManagerPlaygroundImpl" class="nl.cyberdam.service.ExchangeManagerPlaygroundImpl">
+	<property name="gameManager" ref="gameManager" />
+	</bean>
+	<bean id="exchangeManagerGameModelImpl" class="nl.cyberdam.service.ExchangeManagerGameModelImpl">
+	<property name="gameManager" ref="gameManager" />
+	</bean>
+</beans>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/cyberdam">
+<!--  NOTES:
+
+	Use this file as an example context file: you can either rename it to context.xml and put
+	it in the META-INF directory inside the cyberdam webap or put the contents in a Context element in your tomcat 
+	server.xml file. This file has been set up to always use the 'cyberdam' database - you might
+	want to create separate databases for several installs or versions. To change the database name
+	change 'cyberdam' in the url to your desired database name.
+	
+	for connector options see: http://dev.mysql.com/doc/refman/5.0/en/connector-j-usagenotes-j2ee.html
+ -->
+<Resource name="jdbc/cyberdam" 
+          auth="Container" 
+          type="javax.sql.DataSource"
+          maxActive="50" 
+          maxIdle="35" 
+          maxWait="10000"
+          username="cyberdam" 
+          password="c4b3rdam" 
+          driverClassName="com.mysql.jdbc.Driver"
+          removeAbandoned="true" 
+          removeAbandonedTimeout="120" 
+          logAbandoned="true"
+          url="jdbc:mysql://localhost:3306/cyberdam?useUnicode=true&amp;characterEncoding=UTF8&amp;mysqlEncoding=utf8"
+          validationQuery="select now();"
+          />
+<Resource name="mail/Session" auth="Container"
+            type="javax.mail.Session"
+            mail.smtp.host="localhost"/>
+</Context>

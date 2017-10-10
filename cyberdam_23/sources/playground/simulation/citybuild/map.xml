@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<objects_for_flashmap>
+     <object num="1">
+          <id>sd001</id>
+          <name>Achterhaven</name>
+          <url>object/sd-001</url>
+          <thumbnail_url>object-content/th_sd001.jpg</thumbnail_url>
+          <description>De Achterhaven is een van de drie oude havens van Sieberdam.</description>
+          <locationx>100</locationx>
+		  <locationy>100</locationy>
+		  <type>btn_club</type>
+     </object>
+     <object num="2">
+          <id>sd002</id>
+          <name>Antex uitzendbureau</name>
+          <url>object/sd-002</url>
+          <thumbnail_url>object-content/th_sd002.jpg</thumbnail_url>
+          <description>Antex heeft zich in de loop der tijd gespecialiseerd in dienstverlenende beroepen.</description>
+          <locationx>50</locationx>
+		  <locationy>50</locationy>
+		  <type>btn_advocaten</type>
+     </object>
+     <object num="3">
+          <id>sd003</id>
+          <name>Apotheek Sieberdam</name>
+          <url>object/sd-003</url>
+          <thumbnail_url>object-content/th_sd003.jpg</thumbnail_url>
+          <description>De oude apotheek van Sieberdam is in 1932 geheel uitgebrand. Sindsdien is zij in Middelberg gevestigd.</description>
+          <locationx>0</locationx>
+		  <locationy>0</locationy>
+		  <type>btn_infrastructuur</type>
+     </object>
+     <object num="4">
+          <id>sd004</id>
+          <name>Artsenpraktijk NGF</name>
+          <url>object/sd-004</url>
+          <thumbnail_url>object-content/th_sd004.jpg</thumbnail_url>
+          <description>Artsenpraktijk NGF is een recente samenvoeging van enkele bestaande huisartsenpraktijken.</description>
+          <locationx>100</locationx>
+		  <locationy>0</locationy>
+		  <type>btn_instelling</type>
+     </object>
+     <object num="5">
+          <id>sd005</id>
+          <name>Bakker Bas</name>
+          <url>object/sd-005</url>
+          <thumbnail_url>object-content/th_sd005.jpg</thumbnail_url>
+          <description>Al sinds de middeleeuwen zit de bakkerij in de oude stad. Er wordt nog elke nacht brood gebakken.</description>
+          <locationx>0</locationx>
+		  <locationy>100</locationy>
+		  <type>btn_monumenten</type>
+     </object>
+</objects_for_flashmap>

@@ -1,0 +1,47 @@
+.menu, .submenu {
+  display: none;
+    list-style-type:none;
+    list-style-image:none;
+    line-height: 20px;
+}
+
+li.menubar a.actuator
+{
+  text-decoration: none;
+  font-weight: bold;
+}
+li a.standalone, li a.standalone:hover {
+  line-height: 20px;
+  height:20px;	
+}
+
+li.menubar, li.menu {
+  list-style-type:none;
+  list-style-image:none;
+}
+
+li.menubar a.standalone, .menu li a, .submenu li a 
+{
+  list-style-image:url('img/circle.gif');
+  list-style-type:none;
+	list-style-position:outside;
+  text-decoration: none;
+  font-weight: bold;
+  display: list-item;
+}
+
+.menu li, .submenu li {
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+}
+
+li.menubar a.standalone:hover
+{
+  list-style-image:url('img/disc.gif');
+  list-style-type:none;
+  list-style-position:outside;
+  text-decoration: none;
+  font-weight: bold;
+  display: list-item;
+}

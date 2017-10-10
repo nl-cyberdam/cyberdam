@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="root" type="root"/>
+  <xs:element name="languagePack" type="languagePack"/>
+
+  <xs:complexType name="activity" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="attachments" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="resources" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="instructions" type="xs:string" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="roleActivities" type="roleActivity" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="disabledScript" type="xs:string" minOccurs="0"/>
+          <xs:element name="script" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="baseObject" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="resource">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="comment" type="xs:string" minOccurs="0"/>
+          <xs:element name="content" type="xs:base64Binary" minOccurs="0"/>
+          <xs:element name="contentType" type="xs:string" minOccurs="0"/>
+          <xs:element name="fileName" type="xs:string" minOccurs="0"/>
+          <xs:element name="fileSize" type="xs:int" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="messageActivity">
+    <xs:complexContent>
+      <xs:extension base="activity">
+        <xs:sequence>
+          <xs:element name="defaultMessageText" type="xs:string" minOccurs="0"/>
+          <xs:element name="recipients" type="role" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="activityVariable">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="caption" type="xs:string" minOccurs="0"/>
+          <xs:element name="mandatory" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="variable" type="variable" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="formActivity">
+    <xs:complexContent>
+      <xs:extension base="activity">
+        <xs:sequence>
+          <xs:element name="activityVariables" type="activityVariable" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="variable">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="initialValue" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="role">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="variables" type="variable" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="progressActivity">
+    <xs:complexContent>
+      <xs:extension base="activity">
+        <xs:sequence>
+          <xs:element name="defaultOption" type="xs:int"/>
+          <xs:element name="nextStepOfPlayOptions" type="nextStepOfPlay" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="roleActivity">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="role" type="role" minOccurs="0"/>
+      <xs:element name="stepOfPlay" type="stepOfPlay" nillable="true" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nextStepOfPlay">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="step" type="stepOfPlay" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="stepOfPlay">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="script" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="fileUploadActivity">
+    <xs:complexContent>
+      <xs:extension base="activity">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="eventActivity">
+    <xs:complexContent>
+      <xs:extension base="activity">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="authorities">
+    <xs:sequence>
+      <xs:element name="gameAuthor" type="xs:boolean"/>
+      <xs:element name="gameManifestComposer" type="xs:boolean"/>
+      <xs:element name="gameSessionMaster" type="xs:boolean"/>
+      <xs:element name="lcmsAdministrator" type="xs:boolean"/>
+      <xs:element name="lmsAdministrator" type="xs:boolean"/>
+      <xs:element name="playgroundAuthor" type="xs:boolean"/>
+      <xs:element name="systemAdministrator" type="xs:boolean"/>
+      <xs:element name="userAdministrator" type="xs:boolean"/>
+      <xs:element name="vleAdministrator" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="gameManifest">
+    <xs:sequence>
+      <xs:element name="created" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="creator" type="user" minOccurs="0"/>
+      <xs:element name="gameModel" type="gameModel" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="lastModified" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="lastModifier" type="user" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="owner" type="user" minOccurs="0"/>
+      <xs:element name="rolesToPlaygroundObjects" type="roleToPlaygroundMapping" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="status" type="status" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="username" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="group">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="category" type="xs:string" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="lastModified" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="lastModifiedBy" type="user" minOccurs="0"/>
+          <xs:element name="members" type="user" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="gameModel">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="roles" type="role" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="stepsOfPlay" type="stepOfPlay" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="activities" type="activity" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="resources" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="variables" type="variable" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="caption" type="xs:string" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+      	  <xs:element name="lastModifier" type="user" minOccurs="0"/>
+      	  <xs:element name="lastModified" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="initialStepOfPlay" type="stepOfPlay" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="statusTemplate" type="xs:string" minOccurs="0"/>
+          <xs:element name="headerTemplate" type="xs:string" minOccurs="0"/>
+          <xs:element name="script" type="xs:string" minOccurs="0"/>
+          <xs:element name="sessionClassicLayout" type="xs:boolean" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="roleToPlaygroundMapping">
+    <xs:sequence>
+      <xs:element name="gameManifest" type="gameManifest" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="playground" type="playground" minOccurs="0"/>
+      <xs:element name="playgroundObject" type="playgroundObject" minOccurs="0"/>
+      <xs:element name="role" type="role" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="playground">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="caption" type="xs:string" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="link" type="xs:string" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="playgroundObjects" type="playgroundObject" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="status" type="status" minOccurs="0"/>
+          <xs:element name="uriId" type="xs:string" minOccurs="0"/>
+          <xs:element name="version" type="xs:string" minOccurs="0"/>
+          <xs:element name="lastModified" type="xs:dateTime" minOccurs="0"/>
+      	  <xs:element name="lastModifier" type="user" minOccurs="0"/>    	  
+          <xs:element name="language" type="xs:string" minOccurs="0"/>
+          <xs:element name="background" type="xs:string" minOccurs="0"/>
+          <xs:element name="keywords" type="xs:string" minOccurs="0"/>
+          <xs:element name="contribution" type="xs:string" minOccurs="0"/>
+          <xs:element name="size" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="playgroundObject">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="id" type="xs:long" minOccurs="0"/>
+          <xs:element name="address" type="xs:string" minOccurs="0"/>
+          <xs:element name="caption" type="xs:string" minOccurs="0"/>
+          <xs:element name="category" type="category" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="inDirectory" type="xs:boolean"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="onMap" type="xs:boolean"/>
+          <xs:element name="picture" type="resource" minOccurs="0"/>
+          <xs:element name="thumbnail" type="resource" minOccurs="0"/>
+          <xs:element name="uri" type="xs:string" minOccurs="0"/>
+          <xs:element name="url" type="xs:string" minOccurs="0"/>
+          <xs:element name="status" type="status" minOccurs="0"/>
+          <xs:element name="x" type="xs:int" minOccurs="0"/>
+          <xs:element name="y" type="xs:int" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="gameSession">
+    <xs:complexContent>
+      <xs:extension base="baseObject">
+        <xs:sequence>
+          <xs:element name="created" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="creator" type="user" minOccurs="0"/>
+          <xs:element name="lastModified" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="lastModifier" type="user" minOccurs="0"/>
+          <xs:element name="manifest" type="gameManifest" minOccurs="0"/>
+          <xs:element name="name" type="xs:string" minOccurs="0"/>
+          <xs:element name="owner" type="user" minOccurs="0"/>
+          <xs:element name="participants" type="participant" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="runningStarted" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="sessionStopped" type="xs:dateTime" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="participant">
+    <xs:sequence>
+      <xs:element name="completedActivities" type="activity" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="gameSession" type="gameSession" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="inbox" type="messageBox" minOccurs="0"/>
+      <xs:element name="notifyNewStepOfPlay" type="xs:boolean"/>
+      <xs:element name="outbox" type="messageBox" minOccurs="0"/>
+      <xs:element name="outtrash" type="messageBox" minOccurs="0"/>
+      <xs:element name="roleAndPlayground" type="roleToPlaygroundMapping" minOccurs="0"/>
+      <xs:element name="sessionResourceBox" type="sessionResourceBox" minOccurs="0"/>
+      <xs:element name="sessionResourceTrash" type="sessionResourceBox" minOccurs="0"/>
+      <xs:element name="trash" type="messageBox" minOccurs="0"/>
+      <xs:element name="users" type="user" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="messageBox">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="messages" type="message" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="message">
+    <xs:sequence>
+      <xs:element name="attachments" type="sessionResource" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="body" type="xs:string" minOccurs="0"/>
+      <xs:element name="recipients" type="participant" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="sender" type="participant" minOccurs="0"/>
+      <xs:element name="sentDate" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="stepOfPlay" type="stepOfPlay" minOccurs="0"/>
+      <xs:element name="subject" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sessionResource">
+    <xs:sequence>
+      <xs:element name="content" type="xs:base64Binary" minOccurs="0"/>
+      <xs:element name="contentType" type="xs:string" minOccurs="0"/>
+      <xs:element name="created" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="fileSize" type="xs:int"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="stepOfPlay" type="stepOfPlay" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sessionResourceBox">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="logEntry">
+    <xs:sequence>
+      <xs:element name="action" type="xs:string" minOccurs="0"/>
+      <xs:element name="date" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="module" type="module" minOccurs="0"/>
+      <xs:element name="parameter" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="systemParameters">
+    <xs:sequence>
+      <xs:element name="croninterval" type="xs:int"/>
+      <xs:element name="defaultLanguageCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="defaultRows" type="xs:int"/>
+      <xs:element name="email" type="xs:string" minOccurs="0"/>
+      <xs:element name="uploadSizeMaxBytes" type="xs:long"/>
+      <xs:element name="vleActivities" type="xs:int"/>
+      <xs:element name="vleFiles" type="xs:int"/>
+      <xs:element name="vleMail" type="xs:int"/>
+      <xs:element name="vleMessage" type="xs:boolean"/>
+      <xs:element name="vleStep" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="root">
+    <xs:sequence>
+      <xs:element name="gameModel" type="gameModel" minOccurs="0"/>
+      <xs:element name="playground" type="playground" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="localeAdapter">
+    <xs:complexContent>
+      <xs:extension base="xmlAdapter">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="xmlAdapter" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="languagePack">  	
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="locale" type="xs:string" minOccurs="0"/>
+      <xs:element name="messages" type="multiLanguageMessage" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="multiLanguageMessage">
+    <xs:sequence>
+      <xs:element name="basename" type="xs:string" minOccurs="0"/>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="languagePack" type="languagePack" minOccurs="0"/>
+      <xs:element name="message" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="myHashMap">
+    <xs:complexContent>
+      <xs:extension base="hashMap">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="hashMap">
+    <xs:complexContent>
+      <xs:extension base="abstractMap">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractMap" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:simpleType name="authority">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ROLE_PARTICIPANT"/>
+      <xs:enumeration value="ROLE_GAMESESSIONMASTER"/>
+      <xs:enumeration value="ROLE_GAMEMANIFESTCOMPOSER"/>
+      <xs:enumeration value="ROLE_GAMEAUTHOR"/>
+      <xs:enumeration value="ROLE_PLAYGROUNDAUTHOR"/>
+      <xs:enumeration value="ROLE_LCMSADMININSTRATOR"/>
+      <xs:enumeration value="ROLE_LMSADMINISTRATOR"/>
+      <xs:enumeration value="ROLE_VLEADMINISTRATOR"/>
+      <xs:enumeration value="ROLE_USERADMINISTRATOR"/>
+      <xs:enumeration value="ROLE_SYSTEMADMINISTRATOR"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="userStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DISABLED"/>
+      <xs:enumeration value="ENABLED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="category">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TBD"/>
+      <xs:enumeration value="GOVERNMENT_BODY"/>
+      <xs:enumeration value="UTILITY"/>
+      <xs:enumeration value="ENTERPRISE"/>
+      <xs:enumeration value="ASSOCIATION"/>
+      <xs:enumeration value="PRIVATE_HOUSEHOLD"/>
+      <xs:enumeration value="PHOTO_SHOT"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="status">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="UNDER_CONSTRUCTION"/>
+      <xs:enumeration value="PRIVATE"/>
+      <xs:enumeration value="PUBLIC"/>
+      <xs:enumeration value="OBSOLETE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="module">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SYSTEM"/>
+      <xs:enumeration value="LMS"/>
+      <xs:enumeration value="LCMS"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sessionStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="IN_PREPARATION"/>
+      <xs:enumeration value="READY_TO_START"/>
+      <xs:enumeration value="RUNNING"/>
+      <xs:enumeration value="FINISHED"/>
+      <xs:enumeration value="ABORTED"/>
+      <xs:enumeration value="CANCELLED"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

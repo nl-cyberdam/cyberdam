@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:lang="http://www.springframework.org/schema/lang"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd 
+        http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd
+        ">
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/project.properties" />
+	</bean>
+    
+    <bean name="openSessionInViewInterceptor"  
+          class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor">
+        <property name="sessionFactory"><ref bean="sessionFactory"/></property>
+    </bean>
+    
+    <bean id="localeResolver"
+          class="nl.cyberdam.util.CyberdamLocaleResolver">
+          <property name="gameManager" ref="gameManager" />
+    </bean>
+
+    <bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+        <property name="defaultThemeName" value="theme_default"/>
+    </bean>
+
+	<!-- tiles -->
+    <bean id="tilesConfigurer"
+    	class="org.springframework.web.servlet.view.tiles2.TilesConfigurer" autowire="byType">
+    </bean>
+    
+    <!-- this mapping takes precence over the other one (order = 0)
+      -->
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="order"><value>0</value></property>
+        <property name="interceptors">
+            <list>
+                 <ref bean="openSessionInViewInterceptor"/> 
+            </list>
+        </property>
+        <property name="mappings">
+            <props>
+                <prop key="/index.htm">indexController</prop>
+                <prop key="/resource">imageController</prop>
+                <prop key="/image">imageController</prop>
+                <prop key="/map.xml">mapController</prop>
+                <prop key="/sessionresource">sessionResourceController</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+        <property name="order"><value>2</value></property>
+        <property name="interceptors">
+            <list>
+                 <ref bean="openSessionInViewInterceptor"/>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator" />
+    
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- to provide Locale etc to the jstl it must be explicitely configured,
+             see: http://www.springframework.org/docs/api/org/springframework/web/servlet/view/JstlView.html
+        -->
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    
+    <!-- Support for multipart requests using commons file upload
+	 Make sure you have the commons-fileupload.jar in your classpath
+      -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- Limit uploads to 5MB -->
+        <property name="maxUploadSize" value="5242880" />
+    </bean>
+    <!-- 
+    for the majority of the controllers use the new ControllerClassNameHandlerMapping 
+    above, but because the class used is the ParameterizableViewController we
+    are specifying a bean name to define the mapping as /index.htm
+    -->
+    <bean name="indexController" class="nl.cyberdam.web.ParameterizableViewWithMenuController">
+        <!-- this will forward directly to view stored in /WEB-INF/jsp/index.jsp -->
+        <property name="viewName" value="index" />
+        <property name="menuUtil" ref="menuUtil" />
+    </bean>
+    
+    <bean id="editUserController" class="nl.cyberdam.web.EditUserController" autowire="byType" >
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="userManager" ref="userManager"/>
+        <property name="messageSource"  ><ref bean="dbMessageSource" /></property>
+        <property name="successView"><value>redirect:useradministration.htm?forceRefresh=true</value></property>
+        <property name="cancelView"><value>redirect:useradministration.htm</value></property>
+        <property name="validator"><bean class="nl.cyberdam.web.validation.EditUserCommandValidator"/></property>
+    </bean>
+
+    <bean id="resetPasswordController" class="nl.cyberdam.web.ResetPasswordController" autowire="byType">
+        <property name="userManager" ref="userManager"/>
+        <property name="gameManager" ref="gameManager"/>
+		<property name="mailService" ref="mailService" />
+		<property name="passwordEncoder" ref="passwordEncoder" />
+		<property name="passwordGenerator" ref="passwordGenerator" />
+		<property name="messageSource" ref="messageSource" />
+    </bean>
+    
+    <bean id="mySettingsController" class="nl.cyberdam.web.MySettingsController" autowire="byType" >
+        <property name="userManager" ref="userManager"/>
+        <property name="messageSource"  ><ref bean="dbMessageSource" /></property>
+        <property name="successView"><value>redirect:index.htm</value></property>
+        <property name="cancelView"><value>redirect:index.htm</value></property>
+		<property name="passwordEncoder" ref="passwordEncoder" />
+        <property name="validator">
+            <bean class="nl.cyberdam.web.validation.EditUserCommandValidator"/>
+        </property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundController" autowire="byType">
+    	<property name="menuUtil" ref="menuUtil" />
+    	<property name="swfPath"><value>${swf.path}</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundDetailController" autowire="byType" >
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundListPageController" autowire="byType" >
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundEditorPageController" autowire="byType" >
+        <property name="successView"><value>redirect:playgrounddetail.htm</value></property>
+        <property name="cancelView"><value>redirect:playgrounddetail.htm</value></property>
+        <property name="validator">
+            <bean class="nl.cyberdam.validation.PlaygroundValidator"/>
+        </property>
+    	<property name="swfPath"><value>${swf.path}</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundObjectEditorController" autowire="byType" >
+        <property name="successView"><value>redirect:playgrounddetail.htm?forceRefresh=true#playgroundobjects_section</value></property>
+        <property name="cancelView"><value>redirect:playgrounddetail.htm#playgroundobjects_section</value></property>
+        <property name="validator">
+            <bean class="nl.cyberdam.validation.PlaygroundObjectValidator"/>
+        </property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundObjectViewerController" autowire="byType" >
+    	<property name="formView"><value>playgroundobjecteditor</value></property>
+        <property name="cancelView"><value>redirect:playgrounddetail.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.LogController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.LanguagePacksController" >
+    	<property name="sessionFactory" ref="sessionFactory" />
+    	<property name="view" value="languagepacks"/>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.LanguagePackImportController" >
+        <property name="sessionFactory"><ref bean="sessionFactory"/></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.DeleteLanguagePackController">
+        <property name="gameManager" ref="gameManager" ></property>
+        <property name="successRedirect"><value>languagepacks.htm?forceRefresh=true</value></property>
+        <property name="cancelRedirect"><value>languagepacks.htm</value></property>
+        <property name="view"><value>deletelanguagepack</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.LanguagePackEditorController" >
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="validator"><bean class="nl.cyberdam.validation.LanguagePackValidator"/></property>
+        <property name="successView"><value>redirect:languagepacks.htm</value></property>
+        <property name="cancelView"><value>redirect:languagepacks.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SystemAdministrationController" >
+            <property name="menuUtil" ref="menuUtil" />
+    </bean>
+
+    <bean class="nl.cyberdam.web.VariableEditorController">
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="gameManager" ref="gameManager" ></property>
+        <property name="validator"><bean class="nl.cyberdam.validation.VariableValidator"/></property>
+        <property name="successView"><value>redirect:variable.htm?forceRefresh=true</value></property>
+        <property name="cancelView"><value>redirect:variable.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.VariableDeleteController" autowire="byType" >
+        <property name="successRedirect"><value>redirect:variable.htm?forceRefresh=true</value></property>
+        <property name="cancelRedirect"><value>redirect:variable.htm</value></property>
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SystemController" ></bean>
+    
+    <bean class="nl.cyberdam.web.SystemParametersController" autowire="byType" >
+    	<property name="successView"><value>redirect:systemadministration.htm</value></property>
+        <property name="cancelView"><value>redirect:systemadministration.htm</value></property>
+        <property name="validator"><bean class="nl.cyberdam.validation.SystemParametersValidator"></bean></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.ModelTemplateEditorController" autowire="byType" >
+    	<property name="successView"><value>redirect:systemparameters.htm</value></property>
+        <property name="cancelView"><value>redirect:systemparameters.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundTemplateEditorController" autowire="byType" >
+    	<property name="successView"><value>redirect:systemparameters.htm</value></property>
+        <property name="cancelView"><value>redirect:systemparameters.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.UserAdministratorController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.UserAdministrationController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.DeleteGroupController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.DeleteUserController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.GroupAdministrationController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.HelpController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.GroupSettingsController" autowire="byType" >
+        <property name="successView"><value>redirect:groupadministration.htm?forceRefresh=true</value></property>
+        <property name="cancelView"><value>redirect:groupadministration.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameAuthorController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.DeleteGameModelController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.DeleteGameManifestController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.DeleteGameSessionController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean id="sessionReportLogService" class="nl.cyberdam.service.SessionReportLogServiceImpl" autowire="byType" >
+        <property name="sessionFactory" ref="sessionFactory" ></property>
+    </bean>
+    <bean class="nl.cyberdam.web.SessionReportController" autowire="byType" >
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+        <property name="gameManager" ref="gameManager" ></property>
+    </bean>
+    <bean class="nl.cyberdam.web.SessionActivityViewer" autowire="byType">
+        <property name="gameManager" ref="gameManager" />
+	</bean>
+    <bean class="nl.cyberdam.web.PrintableSessionReportController" autowire="byType" >
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+        <property name="gameManager" ref="gameManager" ></property>
+    </bean>
+    <bean class="nl.cyberdam.web.DeletePlaygroundObjectController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.DeletePlaygroundController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.CopyPlaygroundObjectController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.CopyGameModelController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.CopyGameManifestController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    <bean class="nl.cyberdam.web.CopyGameSessionController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameManifestComposerController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.GameMasterController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.GameParticipantController" autowire="byType" ></bean>
+
+    <bean class="nl.cyberdam.web.PlaygroundWindowController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.VariableController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.SessionController" autowire="byType" >
+        <property name="scriptManager" ref="scriptManager"></property>
+    	<property name="menuUtil" ref="menuUtil" />
+    </bean>
+    <bean class="nl.cyberdam.web.SessionDeleteFileController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.SessionDeleteMessageController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.SessionEditFileController" autowire="byType" >
+    	<property name="successView"><value>filedirectory.htm</value></property>
+        <property name="cancelView"><value>filedirectory.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SessionMessageActivityController" autowire="byType" >
+        <property name="scriptManager" ref="scriptManager"></property>
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+        <property name="successView"><value>session.htm</value></property>
+        <property name="cancelView"><value>session.htm</value></property>
+        <property name="validator">
+            <bean class="nl.cyberdam.validation.MessageValidator"/>
+        </property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SessionEventActivityController" autowire="byType" >
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+	    <property name="gameManager" ref="gameManager" ></property>
+        <property name="scriptManager" ref="scriptManager"></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SessionFormActivityController" autowire="byType" >
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+        <property name="sessionFactory"><ref bean="sessionFactory"/></property>
+        <property name="validator"><bean class="nl.cyberdam.validation.FormActivityValidator"/></property>
+        <property name="successView"><value>session.htm</value></property>
+        <property name="cancelView"><value>session.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.SessionFileUploadActivityController" autowire="byType" >
+        <property name="scriptManager" ref="scriptManager"></property>
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+    	<property name="validator">
+	    <bean id="sessionFileUploadBeanValidator" class="nl.cyberdam.web.validation.SessionFileUploadBeanValidator">
+	    	<property name="gameManager" ref="gameManager" ></property>
+	    </bean>
+    	</property>
+    </bean>
+
+    <bean class="nl.cyberdam.web.ParticipantReportController" autowire="byType" >
+        <property name="gameManager" ref="gameManager" ></property>
+        <property name="menuUtil" ref="menuUtil" ></property>
+        <property name="sessionReportLogService" ref="sessionReportLogService" ></property>
+    </bean>
+
+    <bean class="nl.cyberdam.web.SessionProgressActivityController" autowire="byType" >
+        <property name="sessionReportLogService" ref="sessionReportLogService"></property>
+        <property name="scriptManager" ref="scriptManager"></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.MessagesController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.MessageTrashController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.MessageController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.ActivitiesController" autowire="byType" ></bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundIntroController" autowire="byType" >
+    	<property name="menuUtil" ref="menuUtil" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundDirectoryController" autowire="byType" >
+    	<property name="menuUtil" ref="menuUtil" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.PlaygroundObjectController" autowire="byType" >
+    	<property name="menuUtil" ref="menuUtil" />
+    </bean>
+    <bean class="nl.cyberdam.web.PlaygroundObjectOwnerController" autowire="byType" >
+    	<property name="gameManager" ref="gameManager" />
+    	<property name="menuUtil" ref="menuUtil" />
+        <property name="successView"><value>redirect:playgroundobject.htm</value></property>
+    </bean>
+    <bean class="nl.cyberdam.web.BrowseUsersController" autowire="byType" />
+    <bean class="nl.cyberdam.web.BrowseGameModelsController" autowire="byType" />
+    <bean class="nl.cyberdam.web.BrowseGameManifestsController" autowire="byType" />
+    
+    <bean class="nl.cyberdam.web.GameIntroController" autowire="byType" >
+    	<property name="menuUtil" ref="menuUtil" />
+    </bean>
+    <bean class="nl.cyberdam.web.AboutSessionController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.ResourceUploadController" autowire="byType"/>
+    
+    <bean class="nl.cyberdam.web.CreateGameSessionController" autowire="byType" >
+        <!-- <property name="successView"><value>redirect:gamemaster.htm</value></property> -->
+        <property name="cancelView"><value>redirect:gamemaster.htm</value></property>
+    </bean>
+    <bean class="nl.cyberdam.web.GameSessionControlController" autowire="byType" >
+    	<property name="scriptManager" ref="scriptManager" />
+        <property name="commandClass">
+            <value>nl.cyberdam.domain.GameSession</value>
+        </property>
+        <property name="successView"><value>redirect:gamemaster.htm?forceRefresh=true</value></property>
+        <property name="cancelView"><value>redirect:gamemaster.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.AddUserToGroupController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.DeleteUserFromGroupController" autowire="byType" ></bean>
+    <bean class="nl.cyberdam.web.EditMultilanguageMessageController" autowire="byType" >
+        <property name="messageSource" ref="dbMessageSource" />
+        <property name="successView"><value>multilanguage.htm</value></property>
+        <property name="cancelView"><value>multilanguage.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.DeleteMultilanguageMessageController" autowire="byType" >
+        <property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameManifestController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemanifestcomposer.htm?forceRefresh=true</value></property>
+        <property name="cancelView"><value>redirect:gamemanifestcomposer.htm</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameManifestViewerController" autowire="byType" >
+        <property name="cancelView"><value>redirect:gamemanifestcomposer.htm</value></property>
+        <property name="formView"><value>gamemanifest</value></property>   
+    </bean>
+    
+    <bean class="nl.cyberdam.tools.UserImporter" autowire="byType" />
+     <bean class="nl.cyberdam.web.UploadUsersController" autowire="byType" >
+     </bean>
+    
+    <bean class="nl.cyberdam.web.MultilanguageController" autowire="byType" >
+        <property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.LanguagePackExportController" autowire="byType" >
+        <property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean id="imageController" class="nl.cyberdam.web.ImageController" autowire="byType" />
+    <bean id="sessionResourceController" class="nl.cyberdam.web.SessionResourceController" autowire="byType" />
+    
+    <bean class="nl.cyberdam.web.FileController" autowire="byType" />
+    <bean class="nl.cyberdam.web.FileDirectoryController" autowire="byType" />
+    <bean class="nl.cyberdam.web.FileDirectoryTrashController" autowire="byType" />
+    
+    <bean class="nl.cyberdam.web.HouseKeepingController" autowire="byType" />
+    
+    <bean class="nl.cyberdam.web.SendMessageController" autowire="byType" >
+        <property name="successView"><value>session.htm</value></property>
+        <property name="cancelView"><value>session.htm</value></property>
+        <property name="messageSource" ref="dbMessageSource" />
+        <property name="sessionReportLogService" ref="sessionReportLogService"/>
+        <property name="validator">
+            <bean class="nl.cyberdam.validation.MessageValidator"/>
+        </property>        
+    </bean>
+    
+    <bean id="mapController" class="nl.cyberdam.web.XmlMapController" autowire="byType" >
+    </bean>
+    
+    <bean id="playgroundExportController" class="nl.cyberdam.web.PlaygroundExportController" autowire="byType">
+    	<property name="exchangeManager" ref="exchangeManagerPlaygroundImpl" />
+    	<property name="swfPath"><value>${swf.path}</value></property>
+    </bean>
+    
+    <bean id="playgroundImportController" class="nl.cyberdam.web.PlaygroundImportController" autowire="byType">
+    	<property name="messageSource" ref="dbMessageSource" />
+    	<property name="validator">
+	    <bean id="playgroundImportBeanValidator" class="nl.cyberdam.web.validation.SessionFileUploadBeanValidator">
+	    	<property name="gameManager" ref="gameManager" ></property>
+	    </bean>
+    	</property>
+    	<property name="exchangeManager" ref="exchangeManagerPlaygroundImpl" />
+    	<property name="swfPath"><value>${swf.path}</value></property>
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameModelDetailController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelMetaDataController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemodeldetail.htm#metadata_section</value></property>
+        <property name="cancelView"><value>redirect:gamemodeldetail.htm#metadata_section</value></property>
+    	<property name="validator"><bean class="nl.cyberdam.validation.GameModelValidator" /></property>
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelActivityEditController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemodeldetail.htm?forceRefresh=true#activities_section</value></property>
+        <property name="cancelView"><value>redirect:gamemodeldetail.htm#activities_section</value></property>
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelStepDetailsController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemodeldetail.htm?forceRefresh=true#activities_section</value></property>
+        <property name="cancelView"><value>redirect:gamemodeldetail.htm#activities_section</value></property>
+	    <property name="gameManager" ref="gameManager" ></property>
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelGamePlayController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemodeldetail.htm#gameplay_section</value></property>
+        <property name="cancelView"><value>redirect:gamemodeldetail.htm#gameplay_section</value></property>
+		<property name="messageSource" ref="dbMessageSource" />
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelRoleVariablesController" autowire="byType" >
+    	<property name="messageSource" ref="dbMessageSource" />
+    </bean>
+    
+    <bean class="nl.cyberdam.web.GameModelResourceEditController" autowire="byType" >
+        <property name="successView"><value>redirect:gamemodeldetail.htm?forceRefresh=true#resources_section</value></property>
+        <property name="cancelView"><value>redirect:gamemodeldetail.htm#resources_section</value></property>
+	</bean>
+
+    <bean class="nl.cyberdam.web.GameModelVariableEditController" autowire="byType" >
+    	<property name="validator"><bean class="nl.cyberdam.validation.VariableValidator" /></property>
+	</bean>
+
+    <bean id="gameModelExportController" class="nl.cyberdam.web.GameModelExportController" autowire="byType">
+    	<property name="exchangeManager" ref="exchangeManagerGameModelImpl" />
+    </bean>
+    
+    <bean id="gameModelImportController" class="nl.cyberdam.web.GameModelImportController" autowire="byType">
+    	<property name="messageSource" ref="dbMessageSource" />
+    	<property name="validator">
+	    <bean id="gameModelImportBeanValidator" class="nl.cyberdam.web.validation.SessionFileUploadBeanValidator">
+	    	<property name="gameManager" ref="gameManager" ></property>
+	    </bean>
+    	</property>
+    	<property name="exchangeManager" ref="exchangeManagerGameModelImpl" />
+    </bean>
+    
+    <!-- treeview menu code -->
+    <bean id="menu" class="net.sf.navigator.menu.MenuLoader" autowire="byType" >
+		<property name="menuConfig" value="/WEB-INF/menu-config.xml" />
+	</bean>
+	<bean id="menuUtil" class="nl.cyberdam.web.util.MenuUtil" init-method="initialize" >
+		<property name="messageSource" ref="dbMessageSource" />
+		<property name="gameManager" ref="gameManager" />
+	</bean>
+	<bean class="nl.cyberdam.web.SwfUploadController" autowire="byType" >
+		<property name="swfPath"><value>${swf.path}</value></property>
+	</bean>
+ 	<bean class="nl.cyberdam.web.SwfDirectoryController" autowire="byType" >
+    	<property name="swfPath"><value>${swf.path}</value></property>
+    </bean>
+
+ 	<bean
+ 		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+ 		<property name="exceptionMappings">
+ 			<map>
+ 				<entry key="org.mozilla.javascript.EcmaError" value="scriptError" />
+ 			</map>
+ 		</property>
+ 	</bean>
+</beans>

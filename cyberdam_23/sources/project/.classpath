@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/unitils-1.0-rc-4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/commons-lang-2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/dbunit-2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/easymock2.2-.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/easymockclassextension-2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/junit-addons-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/testng-5.1-jdk15.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/spring-test.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testing/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb/jaxb-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsr173/jsr173_api.jar"/>
+	<classpathentry kind="lib" path="lib/testing/junit-4.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rhino/js.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json/json.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

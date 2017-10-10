@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- hibernate jmx -->
+	<bean id="hibernateStatisticsService" class="org.hibernate.jmx.StatisticsService" >
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- ehcache jmx, this class is itself not an mbean, it just
+	     registers the right mbeans with the platform mbean server -->
+	<bean id="ehcacheJmxHelper" class="nl.cyberdam.util.EhcacheJmxHelper" >
+		<constructor-arg  ref="cacheManager" />
+	</bean>
+
+	<!-- this bean must not be lazily initialized if the exporting is to happen -->
+	<bean id="exporter"
+		class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<!-- <property name="autodetect" value="true"/>  autodetect existing mbeans -->
+		<property name="beans">
+			<map>
+				<entry key="bean:name=cyberdam23_gameManager" value-ref="gameManager" />
+				<entry key="bean:name=cyberdam23_hibernateStatisticsService" value-ref="hibernateStatisticsService" />
+			</map>
+		</property>
+	</bean>
+</beans>

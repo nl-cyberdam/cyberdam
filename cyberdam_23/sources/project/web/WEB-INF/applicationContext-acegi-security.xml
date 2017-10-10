@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+  Acegi Security configuration.
+  -->
+<beans>
+    
+    <bean id="filterChainProxy" class="org.acegisecurity.util.FilterChainProxy">
+        <property name="filterInvocationDefinitionSource">
+            <value>
+                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+                PATTERN_TYPE_APACHE_ANT
+                /**=httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,securityContextHolderAwareRequestFilter,rememberMeProcessingFilter,anonymousProcessingFilter,exceptionTranslationFilter,filterInvocationInterceptor
+            </value>
+        </property>
+    </bean>
+    
+    <bean id="httpSessionContextIntegrationFilter" class="org.acegisecurity.context.HttpSessionContextIntegrationFilter"/>
+    
+    <bean id="logoutFilter" class="org.acegisecurity.ui.logout.LogoutFilter">
+        <constructor-arg value="/index.jsp"/> <!-- URL redirected to after logout -->
+        <constructor-arg>
+            <list>
+            	<ref bean="logLogoutListener" />
+                <ref bean="rememberMeServices"/>
+                <bean class="org.acegisecurity.ui.logout.SecurityContextLogoutHandler"/>
+            </list>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="authenticationProcessingFilter" class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <!-- <property name="authenticationFailureUrl" value="/acegilogin.jsp?login_error=1"/> -->
+        <property name="authenticationFailureUrl" value="/index.htm?login_error=1"/>
+        <property name="defaultTargetUrl" value="/"/>
+        <property name="filterProcessesUrl" value="/j_acegi_security_check"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+    </bean>
+    
+    <bean id="securityContextHolderAwareRequestFilter" class="org.acegisecurity.wrapper.SecurityContextHolderAwareRequestFilter"/>
+    
+    <bean id="rememberMeProcessingFilter" class="org.acegisecurity.ui.rememberme.RememberMeProcessingFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+    </bean>
+    
+    <bean id="anonymousProcessingFilter" class="org.acegisecurity.providers.anonymous.AnonymousProcessingFilter">
+        <property name="key" value="changeThis"/>
+        <property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
+    </bean>
+    
+    <bean id="exceptionTranslationFilter" class="org.acegisecurity.ui.ExceptionTranslationFilter">
+        <property name="authenticationEntryPoint">
+            <bean class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+                <property name="loginFormUrl" value="/index.htm"/>
+                <property name="forceHttps" value="false"/>
+            </bean>
+        </property>
+        <property name="accessDeniedHandler">
+            <bean class="org.acegisecurity.ui.AccessDeniedHandlerImpl">
+                <property name="errorPage" value="/403.jsp"/>
+            </bean>
+        </property>
+    </bean>
+    
+    <bean id="filterInvocationInterceptor" class="org.acegisecurity.intercept.web.FilterSecurityInterceptor">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="accessDecisionManager">
+            <bean class="org.acegisecurity.vote.AffirmativeBased">
+                <property name="allowIfAllAbstainDecisions" value="false"/>
+                <property name="decisionVoters">
+                    <list>
+                        <bean class="org.acegisecurity.vote.RoleVoter"/>
+                        <bean class="org.acegisecurity.vote.AuthenticatedVoter"/>
+                    </list>
+                </property>
+            </bean>
+        </property>
+        <property name="objectDefinitionSource">
+            <value>
+                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+                PATTERN_TYPE_APACHE_ANT
+                /index.htm=IS_AUTHENTICATED_ANONYMOUSLY
+                /resetpassword.htm=IS_AUTHENTICATED_ANONYMOUSLY
+                /index.jsp=IS_AUTHENTICATED_ANONYMOUSLY
+                /map.xml=IS_AUTHENTICATED_ANONYMOUSLY
+                /themes/**=IS_AUTHENTICATED_ANONYMOUSLY
+                /jawrcss/**=IS_AUTHENTICATED_ANONYMOUSLY 	<!-- JAWR style.css  -->
+                /jawrjs/**=IS_AUTHENTICATED_ANONYMOUSLY 	<!-- JAWR script.js  -->
+                /swf/**=IS_AUTHENTICATED_ANONYMOUSLY 		<!-- Flash movies    -->
+                /*.swf=IS_AUTHENTICATED_ANONYMOUSLY <!-- flash files -->
+                /*.png=IS_AUTHENTICATED_ANONYMOUSLY <!-- png files -->
+                /fckeditor/**=IS_AUTHENTICATED_ANONYMOUSLY <!-- fck editor files -->
+                /js/**=IS_AUTHENTICATED_ANONYMOUSLY
+                /aboutsession.htm=IS_AUTHENTICATED_REMEMBERED
+                /activities.htm=IS_AUTHENTICATED_REMEMBERED
+                /browseusers.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_USERADMINISTRATOR
+                /browsegamemodels.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /browsegamemanifests.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /copyplaygroundobject.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /copygamemanifest.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /copygamemodel.htm=ROLE_LCMSADMININSTRATOR,ROLE_GAMEAUTHOR,ROLE_SYSTEMADMINISTRATOR
+                /copygamesession.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /creategamesession.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deletegamemanifest.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deletegamemodel.htm=ROLE_LCMSADMININSTRATOR,ROLE_GAMEAUTHOR,ROLE_SYSTEMADMINISTRATOR
+                /deletegamesession.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deletegroup.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deleteplaygroundobject.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deleteplayground.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deleteuser.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /deleteuserfromgroup.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /edituser.htm=ROLE_USERADMINISTRATOR,ROLE_PARTICIPANT,ROLE_SYSTEMADMINISTRATOR
+                /file.htm=IS_AUTHENTICATED_REMEMBERED
+                /filedirectory.htm=IS_AUTHENTICATED_REMEMBERED
+                /filedirectorytrash.htm=IS_AUTHENTICATED_REMEMBERED
+                /gameauthor.htm=ROLE_LCMSADMININSTRATOR,ROLE_GAMEAUTHOR,ROLE_SYSTEMADMINISTRATOR
+                /gameintro.htm=IS_AUTHENTICATED_REMEMBERED
+                /gamemanifest.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /gamemanifestviewer.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /gamemanifestcomposer.htm=ROLE_GAMEMANIFESTCOMPOSER,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /gamemaster.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /gamemodelexport.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelimport.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelactivityedit.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodeldetail.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelgameplay.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelmetadata.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelresourceedit.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelresourceviewer.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelrolevariables.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelvariableedit.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+                /gamemodelstepdetails.htm=ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR,ROLE_GAMEAUTHOR
+				/gameparticipant.htm=IS_AUTHENTICATED_REMEMBERED
+				/gamesessioncontrol.htm=ROLE_GAMESESSIONMASTER,ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/sessionreport.htm=ROLE_GAMESESSIONMASTER,ROLE_SYSTEMADMINISTRATOR
+				/printablesessionreport.htm=ROLE_GAMESESSIONMASTER,ROLE_SYSTEMADMINISTRATOR
+				/groupadministration.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/groupsettings.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/help.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/message.htm=IS_AUTHENTICATED_REMEMBERED
+				/messages.htm=IS_AUTHENTICATED_REMEMBERED
+				/messagetrash.htm=IS_AUTHENTICATED_REMEMBERED
+				/mysettings.htm=IS_AUTHENTICATED_REMEMBERED
+				/playground.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/playgrounddirectory.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/playgrounddetail.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundeditor.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundeditorpage.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundexport.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundintro.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/playgroundimport.htm=ROLE_SYSTEMADMINISTRATOR,ROLE_LCMSADMININSTRATOR
+				/playgroundlistpage.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundobject.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/playgroundobjectowner.htm=IS_AUTHENTICATED_REMEMBERED
+				/playgroundobjecteditor.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundobjectviewer.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/playgroundwindow.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/xmlmap.htm=IS_AUTHENTICATED_ANONYMOUSLY
+				/images/*=IS_AUTHENTICATED_ANONYMOUSLY
+				/resourceupload.htm=ROLE_PLAYGROUNDAUTHOR,ROLE_LCMSADMININSTRATOR,ROLE_GAMEAUTHOR,ROLE_SYSTEMADMINISTRATOR
+				/resource=IS_AUTHENTICATED_ANONYMOUSLY
+				/sendmessage.htm=IS_AUTHENTICATED_REMEMBERED
+				/session.htm=IS_AUTHENTICATED_REMEMBERED
+				/sessionactivityviewer.htm=IS_AUTHENTICATED_REMEMBERED
+				/sessiondeletemessage.htm=IS_AUTHENTICATED_REMEMBERED
+				/sessioneditfile.htm=IS_AUTHENTICATED_REMEMBERED
+				/sessiondeletefile.htm=ROLE_PARTICIPANT,ROLE_GAMESESSIONMASTER,ROLE_SYSTEMADMINISTRATOR
+				/sessionfileuploadactivity.htm=IS_AUTHENTICATED_REMEMBERED,ROLE_SYSTEMADMINISTRATOR
+				/sessionmessageactivity.htm=IS_AUTHENTICATED_REMEMBERED,ROLE_SYSTEMADMINISTRATOR
+				/sessionprogressactivity.htm=IS_AUTHENTICATED_REMEMBERED,ROLE_SYSTEMADMINISTRATOR
+				/sessionformactivity.htm=IS_AUTHENTICATED_REMEMBERED,ROLE_SYSTEMADMINISTRATOR
+				/sessioneventactivity.htm=IS_AUTHENTICATED_REMEMBERED,ROLE_SYSTEMADMINISTRATOR
+				/sessionresource=IS_AUTHENTICATED_REMEMBERED
+				/uploadusers.htm=ROLE_VLEADMINISTRATOR,ROLE_LMSADMINISTRATOR,ROLE_GAMESESSIONMASTER,ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /useradministration.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /useradministrator.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /swfdirectory.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+                /swfupload.htm=ROLE_USERADMINISTRATOR,ROLE_SYSTEMADMINISTRATOR
+				/participantreport.htm=IS_AUTHENTICATED_REMEMBERED
+                /addusertogroup.htm=ROLE_SYSTEMADMINISTRATOR,ROLE_USERADMINISTRATOR
+				/uploadusers.htm=ROLE_USERADMINISTRATOR,ROLE_GAMESESSIONMASTER,ROLE_SYSTEMADMINISTRATOR
+                /**=ROLE_SYSTEMADMINISTRATOR <!-- system admin only access for the rest -->
+            </value>
+        </property>
+    </bean>
+    
+    <bean id="rememberMeServices" class="org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices">
+        <!-- <property name="userDetailsService" ref="userDetailsService"/> -->
+        <property name="userDetailsService" ref="userManager"/>
+        <property name="key" value="changeThis"/>
+    </bean>
+    
+    <bean id="authenticationManager" class="org.acegisecurity.providers.ProviderManager">
+        <property name="providers">
+            <list>
+                <ref local="daoAuthenticationProvider"/>
+                <bean class="org.acegisecurity.providers.anonymous.AnonymousAuthenticationProvider">
+                    <property name="key" value="changeThis"/>
+                </bean>
+                <bean class="org.acegisecurity.providers.rememberme.RememberMeAuthenticationProvider">
+                    <property name="key" value="changeThis"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="acegiCache"
+    	class="org.acegisecurity.providers.dao.cache.EhCacheBasedUserCache">
+    	<property name="cache">
+    		<bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    			<property name="cacheManager">
+    				<ref bean="cacheManager" />
+    			</property>
+    			<property name="cacheName" value="userCache" />
+    		</bean>
+    	</property>
+    </bean>
+
+    <bean id="daoAuthenticationProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+        <property name="userDetailsService" ref="userManager"/>
+        <property name="userCache" ref="acegiCache" />
+        <property name="passwordEncoder"><ref local="passwordEncoder" /></property>
+    </bean>
+    
+    <bean id="storeLoginDateListener" class="nl.cyberdam.util.UpdateLastLoginListener" autowire="byType"/>
+    <bean id="logLogoutListener" class="nl.cyberdam.util.LogLogoutHandler" autowire="byType"/>
+    
+    <!-- password encoder -->
+    <bean id="passwordEncoder" class="org.acegisecurity.providers.encoding.Md5PasswordEncoder"/>
+    
+    <bean id="passwordGenerator" class="nl.cyberdam.service.SimplePasswordGenerator"/>
+</beans>
